@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Library Management System</title>
+</head>
+
+<body>
+
+    <h1>Welcome to Library Management System</h1>
+
+    <p>Welcome, {{ request.user.username }}!</p>
+    <a href="{% url 'logout' %}">Logout</a>
+</body>
+
+</html>
