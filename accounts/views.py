@@ -33,8 +33,24 @@ def user_login(request):
     return render(request, 'accounts/login.html')
 
 def home(request):
-    return render(request, 'accounts/home.html')
+    from catalog.models import Book
+    from loans.models import Loan
 
+    books = Book.objects.all()
+
+    loans = Loan.objects.filter(
+        member=request.user,
+        status='borrowed'
+    )
+
+    return render(
+        request,
+        'accounts/home.html',
+        {
+            'books': books,
+            'loans': loans
+        }
+    )
 
 def user_logout(request):
     logout(request)

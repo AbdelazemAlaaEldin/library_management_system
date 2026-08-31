@@ -9,8 +9,79 @@
 
     <h1>Welcome to Library Management System</h1>
 
-    <p>Welcome, {{ request.user.username }}!</p>
+    <h2>Welcome, {{ request.user.username }}!</h2>
+
     <a href="{% url 'logout' %}">Logout</a>
+
+    <hr>
+
+    <h2>Books</h2>
+
+    {% for book in books %}
+
+        <div>
+            <h3>{{ book.title }}</h3>
+
+            <p>Author: {{ book.author }}</p>
+
+            <p>Category: {{ book.category }}</p>
+
+            <p>
+                Available:
+                {{ book.available_copies }}
+                /
+                {{ book.total_copies }}
+            </p>
+
+            {% if book.available_copies > 0 %}
+
+                <a href="{% url 'borrow_book' book.id %}">
+                    <button>Borrow</button>
+                </a>
+
+            {% else %}
+
+                <p>Book Not Available</p>
+
+            {% endif %}
+
+        </div>
+
+        <hr>
+
+    {% empty %}
+
+        <p>No books available.</p>
+
+    {% endfor %}
+
+
+    <h2>My Borrowed Books</h2>
+
+    {% for loan in loans %}
+
+        <div>
+
+            <h3>{{ loan.book.title }}</h3>
+
+            <p>
+                Borrow Date: {{ loan.borrow_date }}
+            </p>
+
+            <a href="{% url 'return_book' loan.id %}">
+                <button>Return</button>
+            </a>
+
+        </div>
+
+        <hr>
+
+    {% empty %}
+
+        <p>You don't have any borrowed books.</p>
+
+    {% endfor %}
+
 </body>
 
 </html>
