@@ -1,0 +1,19 @@
+{% extends 'admin/base_site.html' %}
+{% block content %}
+<div style="max-width:720px">
+  <p><a href="{% url 'admin:catalog_book_changelist' %}">← Your book catalog</a> · <a href="{% url 'admin:catalog_book_import' %}">Search Google Books →</a></p>
+  <div class="module" style="padding:20px">
+    <h2>Google Books connection</h2>
+    <p><strong>{% if configured %}A key is saved. Test it below to verify access.{% else %}No API key configured yet.{% endif %}</strong></p>
+    <p>Your local database holds the books and cover links. Google Books supplies the metadata and images, similar to a movie API. A TMDB key cannot be used here.</p>
+    {% if error %}<p class="errornote" role="alert">{{ error }}</p>{% endif %}
+    <form method="post">{% csrf_token %}{{ form.as_p }}
+      <div class="submit-row"><input type="submit" class="default" name="action" value="Save key"><button type="submit" name="action" value="test" formnovalidate>Test saved key</button></div>
+    </form>
+  </div>
+  <h2>Get a key once</h2>
+  <ol><li>Open <a href="https://console.cloud.google.com/apis/library/books.googleapis.com" target="_blank" rel="noopener noreferrer">Google Cloud → Books API</a>, choose your project, and enable the API.</li><li>Open <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer">Credentials</a>, create an API key, and restrict it to the Books API.</li><li>Paste it in the field above, save, and test the connection. This is a server API key; website referrer restrictions do not apply to server requests.</li></ol>
+  <p>The key is kept in <code>book_api.local.toml</code> on this server, excluded from version control and never shown again in this form. It is not encrypted on disk; protect project-folder access. A server environment variable named <code>GOOGLE_BOOKS_API_KEY</code> takes precedence. Only superusers can manage credentials.</p>
+  <p>No provider guarantees every edition's cover. Missing or broken images retain the library's decorative cover. Images remain on Google's servers; your database stores their URLs.</p>
+</div>
+{% endblock %}

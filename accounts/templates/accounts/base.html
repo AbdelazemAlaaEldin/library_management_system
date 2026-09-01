@@ -1,0 +1,50 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}The Reading Room — A home for every story{% endblock %}</title>
+  <meta name="description" content="Step into The Reading Room. Discover your next book, explore the shelves, and settle in with a little music.">
+  <meta name="theme-color" content="#29251e">
+  <link rel="icon" href="{% static 'library/favicon.svg' %}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Libre+Caslon+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'library/library.css' %}">
+  <script src="{% static 'library/library.js' %}" defer></script>
+  <script src="{% static 'library/cover-images.js' %}" defer></script>
+</head>
+<body data-section="{{ section|default:'auth' }}">
+{% include 'accounts/partials/icons.html' %}
+<a class="skip-link" href="#main">Skip to content</a>
+<div id="app-shell" class="app-shell">
+<aside class="sidebar" id="sidebar" aria-label="Library navigation">
+  <a class="brand" href="{% url 'home' %}" aria-label="The Reading Room home"><span class="brand-icon"><svg><use href="#i-book"/></svg></span><span>The Reading<br>Room<span class="brand-caption">A HOME FOR EVERY STORY</span></span></a>
+  <div class="nav-caption">YOUR LIBRARY</div>
+  <nav class="main-nav">
+    <a href="{% url 'home' %}" class="{% if section == 'collection' and not category and not query %}active{% endif %}"><svg><use href="#i-home"/></svg>The Reading Room<span class="nav-dot"></span></a>
+    <a href="{% url 'home' %}#collection"><svg><use href="#i-books"/></svg>Browse collection</a>
+    {% if request.user.is_authenticated %}<a href="{% url 'home' %}?section=loans" class="{% if section == 'loans' %}active{% endif %}"><svg><use href="#i-book"/></svg>My borrowed books{% if loans %}<span class="nav-count">{{ loans|length }}</span>{% endif %}</a>
+    <a href="{% url 'home' %}?section=saved" class="{% if section == 'saved' %}active{% endif %}"><svg><use href="#i-bookmark"/></svg>Saved for later</a>{% endif %}
+  </nav>
+  {% if categories %}<div class="nav-caption category-caption">BETWEEN THE SHELVES <span>✧</span></div>
+  <nav class="category-nav" aria-label="Book categories">{% for item in categories %}<a class="{% if category == item.category %}selected{% endif %}" href="{% url 'home' %}?category={{ item.category|urlencode }}#collection"><span class="category-dot cat-{{ forloop.counter }}"></span>{{ item.category }}<span>{{ item.count }}</span></a>{% endfor %}</nav>{% endif %}
+  <div class="sidebar-bottom">
+    {% include 'accounts/partials/player.html' %}
+    <a class="librarian-link" href="{% url 'admin:index' %}"><svg><use href="#i-key"/></svg>Librarian's desk<svg><use href="#i-arrow"/></svg></a>
+    {% if request.user.is_staff %}{% if perms.catalog.add_book or perms.catalog.change_book %}<a class="librarian-link" href="{% url 'admin:catalog_book_import' %}"><svg><use href="#i-books"/></svg>Find books &amp; covers<svg><use href="#i-arrow"/></svg></a>{% endif %}{% endif %}
+    <div class="sidebar-footer">A quieter place on the internet.</div>
+  </div>
+</aside>
+<button class="sidebar-scrim" aria-label="Close navigation" hidden></button>
+<div class="workspace">
+<header class="topbar">
+  <button class="icon-button menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><svg><use href="#i-menu"/></svg></button>
+  <p class="topbar-note"><span class="little-spark">✧</span> A little curiosity. A whole new world.</p>
+  <div class="topbar-actions"><span class="open-label"><i></i> The library is open</span><span class="topbar-divider"></span>{% if request.user.is_authenticated %}<span class="avatar">{{ request.user.username|first|upper }}</span><span class="account-name">{{ request.user.username }}</span><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="text-button" type="submit">Sign out</button></form>{% else %}<a class="sign-in" href="{% url 'login' %}"><span class="avatar"><svg><use href="#i-user"/></svg></span>Sign in <svg><use href="#i-arrow"/></svg></a>{% endif %}</div>
+</header>
+<main id="main" tabindex="-1">{% if messages %}<div class="messages" role="status">{% for message in messages %}<div class="message {{ message.tags }}"><svg><use href="#i-check"/></svg>{{ message }}<button aria-label="Dismiss message" class="dismiss-message">×</button></div>{% endfor %}</div>{% endif %}{% block content %}{% endblock %}</main>
+<footer class="page-footer"><a href="{% url 'home' %}"><svg><use href="#i-book"/></svg>The Reading Room</a><span>Good books. Warm corners. A little time for yourself.</span><button class="text-button" id="reopen-doors">Step outside ↗</button></footer>
+</div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+{% block overlay %}{% endblock %}
+</body></html>

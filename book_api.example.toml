@@ -1,0 +1,5 @@
+# Optional: copy to book_api.local.toml and enter your Google Books API key.
+# Or use Librarian's desk -> Books -> Book API settings as a superuser.
+# GOOGLE_BOOKS_API_KEY in the server environment overrides this file.
+[google_books]
+api_key = ""

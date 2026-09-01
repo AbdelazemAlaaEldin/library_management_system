@@ -1,0 +1,28 @@
+<div class="entrance" id="entrance" role="dialog" aria-modal="true" aria-labelledby="entrance-title" data-entry-mode="{{ entrance_mode }}" {% if entrance_mode == 'hidden' %}hidden{% endif %}>
+  <div class="door-surround" aria-hidden="true">
+    <div class="door-leaf door-left"><div class="door-panel"></div><div class="door-panel lower"></div><span class="door-handle"></span></div>
+    <div class="door-leaf door-right"><div class="door-panel"></div><div class="door-panel lower"></div><span class="door-handle"></span></div>
+  </div>
+  <div class="entrance-content">
+    <span class="entrance-emblem"><svg><use href="#i-book"/></svg></span>
+    <span class="entrance-eyebrow">LEAVE THE EVERYDAY AT THE DOOR</span>
+    <h2 id="entrance-title">The Reading<br>Room</h2>
+    <span class="entrance-rule">✧</span>
+    <p>Some doors open to a different world.<br>Choose how your story begins.</p>
+    <div class="entrance-choices">
+      <form method="post" action="{% url 'continue_as_guest' %}">
+        {% csrf_token %}
+        <button id="enter-library" type="submit" class="button button-brass">Continue as guest <svg><use href="#i-arrow"/></svg></button>
+      </form>
+      <span class="guest-description">Browse the books and see what's available. Borrowing requires an account.</span>
+      <div class="entrance-member-actions">
+        <a class="button button-door-outline" href="{% url 'register' %}">Register <svg><use href="#i-user"/></svg></a>
+        <a class="button button-door-outline" href="{% url 'login' %}">Login <svg><use href="#i-key"/></svg></a>
+      </div>
+    </div>
+    <p class="entrance-opening-message" role="status">{% if request.user.is_authenticated %}Welcome, {{ request.user.username }}.{% else %}Welcome, curious reader.{% endif %}<br>Your library doors are opening…</p>
+    <span class="entrance-small">YOUR NEXT CHAPTER IS WAITING</span>
+  </div>
+  <div class="door-light" aria-hidden="true"></div>
+</div>
+<noscript><style>.entrance[data-entry-mode="opening"]{display:none}</style></noscript>

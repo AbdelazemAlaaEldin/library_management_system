@@ -1,87 +1,32 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <title>Library Management System</title>
-</head>
-
-<body>
-
-    <h1>Welcome to Library Management System</h1>
-
-    <h2>Welcome, {{ request.user.username }}!</h2>
-
-    <a href="{% url 'logout' %}">Logout</a>
-
-    <hr>
-
-    <h2>Books</h2>
-
-    {% for book in books %}
-
-        <div>
-            <h3>{{ book.title }}</h3>
-
-            <p>Author: {{ book.author }}</p>
-
-            <p>Category: {{ book.category }}</p>
-
-            <p>
-                Available:
-                {{ book.available_copies }}
-                /
-                {{ book.total_copies }}
-            </p>
-
-            {% if book.available_copies > 0 %}
-
-                <a href="{% url 'borrow_book' book.id %}">
-                    <button>Borrow</button>
-                </a>
-
-            {% else %}
-
-                <p>Book Not Available</p>
-
-            {% endif %}
-
-        </div>
-
-        <hr>
-
-    {% empty %}
-
-        <p>No books available.</p>
-
-    {% endfor %}
-
-
-    <h2>My Borrowed Books</h2>
-
-    {% for loan in loans %}
-
-        <div>
-
-            <h3>{{ loan.book.title }}</h3>
-
-            <p>
-                Borrow Date: {{ loan.borrow_date }}
-            </p>
-
-            <a href="{% url 'return_book' loan.id %}">
-                <button>Return</button>
-            </a>
-
-        </div>
-
-        <hr>
-
-    {% empty %}
-
-        <p>You don't have any borrowed books.</p>
-
-    {% endfor %}
-
-</body>
-
-</html>
+{% extends 'accounts/base.html' %}{% load static %}{% block content %}
+<div class="page-intro"><div><div class="eyebrow">YOUR NEXT CHAPTER STARTS HERE</div><h1>{% if section == 'loans' %}Your borrowing shelf{% elif section == 'saved' %}For another chapter{% elif category %}The {{ category|lower }} shelf{% else %}Welcome to the Reading Room<span class="heading-dot">.</span>{% endif %}</h1></div><button class="text-button entrance-trigger"><svg><use href="#i-key"/></svg>Open the doors</button></div>
+{% if section == 'collection' and not query and not category %}
+<section class="room-hero" aria-label="A warm wooden library with reading tables and chairs"><div class="hero-copy"><div class="hero-kicker"><span></span> MAKE YOURSELF AT HOME</div><h2>Come in.<br>Stay for a story.</h2><p>A favorite chair. The scent of old pages.<br>And a whole world waiting on the shelf.</p><a class="button button-cream" href="#collection">Find your next read<svg><use href="#i-arrow"/></svg></a></div><div class="room-caption"><span class="live-dot"></span> THE READING ROOM <span>·</span> FIND YOUR QUIET</div><span class="hero-corner">01 / THE LIBRARY</span></section>
+<div class="library-notes"><div><svg><use href="#i-books"/></svg><span><strong>{{ book_count }} stories</strong> waiting to be discovered</span></div><div><svg><use href="#i-leaf"/></svg><span><strong>{{ category_count }} little worlds</strong> to get lost in</span></div><div><svg><use href="#i-book"/></svg><span><strong>Borrow a book.</strong> Bring back a story.</span></div></div>
+{% endif %}
+{% if section == 'loans' %}
+<section class="personal-shelf"><div class="section-heading"><div><div class="eyebrow">A FEW GOOD COMPANIONS</div><h2>Currently in your hands</h2></div><span>{{ loans|length }} book{{ loans|length|pluralize }}</span></div>{% for loan in loans %}<article class="loan-card"><div class="mini-cover cover-{{ loan.book.pk|stringformat:'s'|last }}">{% if loan.book.cover_url %}<img class="book-cover-image" data-cover-image src="{{ loan.book.cover_url }}" alt="Cover of {{ loan.book.title }}" loading="lazy" decoding="async" referrerpolicy="no-referrer">{% endif %}<svg><use href="#i-book"/></svg></div><div><span class="eyebrow">{{ loan.book.category }}</span><h3>{{ loan.book.title }}</h3><p>{{ loan.book.author }} <span>· Borrowed {{ loan.borrow_date|date:'M j, Y' }}</span></p></div><form action="{% url 'return_book' loan.pk %}" method="post">{% csrf_token %}<button class="button button-dark" type="submit">Return book <svg><use href="#i-arrow"/></svg></button></form></article>{% empty %}<div class="empty-state"><svg><use href="#i-book"/></svg><h3>A story is waiting for you.</h3><p>{% if request.user.is_authenticated %}Your borrowing shelf is empty. Find something you love in the collection.{% else %}Sign in with your library card to see and borrow books.{% endif %}</p><a class="button button-dark" href="{% if request.user.is_authenticated %}/#collection{% else %}{% url 'login' %}{% endif %}">{% if request.user.is_authenticated %}Explore the collection{% else %}Sign in{% endif %}<svg><use href="#i-arrow"/></svg></a></div>{% endfor %}</section>
+{% else %}
+<section id="collection" class="collection">
+<div class="section-heading"><div><div class="eyebrow">{% if section == 'saved' %}YOUR DEVICE'S LITTLE WISHLIST{% else %}TAKE A WANDER THROUGH THE SHELVES{% endif %}</div><h2>{% if section == 'saved' %}Saved for later{% elif query %}Search the collection{% else %}A shelf for every curiosity{% endif %}</h2></div><span class="section-side-note">{% if section == 'saved' %}Saved in this browser{% else %}Find a book. Find a little magic. <span>✧</span>{% endif %}</span></div>
+<form class="catalog-form" method="get" action="#collection" id="catalog-form">{% if section == 'saved' %}<input type="hidden" name="section" value="saved">{% endif %}
+<div class="catalog-tools"><label class="search-field"><svg><use href="#i-search"/></svg><input name="q" type="search" placeholder="Search by title, author, or ISBN…" value="{{ query }}" aria-label="Search by title, author, or ISBN"><kbd>↵</kbd></label><div class="sort-field"><label for="sort">Sort by:</label><select id="sort" name="sort"><option value="title" {% if sort == 'title' %}selected{% endif %}>Title, A–Z</option><option value="author" {% if sort == 'author' %}selected{% endif %}>Author</option><option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option></select></div><button class="search-submit" type="submit">Search</button></div>
+<div class="category-row"><div class="category-tabs" role="group" aria-label="Filter by category"><button type="submit" name="category" value="" class="category-tab {% if not category %}active{% endif %}"><svg><use href="#i-books"/></svg>All books <span>{{ book_count }}</span></button>{% for item in categories %}<button type="submit" name="category" value="{{ item.category }}" class="category-tab {% if category == item.category %}active{% endif %}">{{ item.category }}</button>{% endfor %}</div><button class="category-scroll icon-button" type="button" aria-label="Scroll through categories"><svg><use href="#i-chevron"/></svg></button></div>
+<input type="hidden" id="current-category" value="{{ category }}">
+<div class="shelf-toolbar"><span class="result-count">{% if section == 'saved' %}<span id="saved-count">0</span> saved books{% else %}<strong>{{ books|length }}</strong> book{{ books|length|pluralize }}{% if category %} in {{ category }}{% endif %}{% if query %} matching “{{ query }}”{% endif %}{% endif %} <span class="toolbar-separator">/</span> A good place to begin</span><div><label class="availability-check"><input type="checkbox" name="available" value="1" {% if available_only %}checked{% endif %}> Available now</label><div class="view-switch" aria-label="Collection layout"><button type="button" data-layout="grid" class="active" aria-label="Grid view" aria-pressed="true"><svg><use href="#i-grid"/></svg></button><button type="button" data-layout="list" aria-label="List view" aria-pressed="false"><svg><use href="#i-list"/></svg></button></div></div></div>
+</form>
+<div class="book-grid" id="book-grid">
+{% for book in books %}<article class="book-card" data-book-id="{{ book.pk }}">
+{% if request.user.is_authenticated %}<button class="save-book" data-save="{{ book.pk }}" aria-label="Save {{ book.title }} for later" aria-pressed="false"><svg><use href="#i-bookmark"/></svg></button>{% endif %}
+<button class="book-cover cover-{{ book.pk|stringformat:'s'|last }}" data-detail="book-{{ book.pk }}" aria-label="View {{ book.title }}">{% if book.cover_url %}<img class="book-cover-image" data-cover-image src="{{ book.cover_url }}" alt="Cover of {{ book.title }}" loading="lazy" decoding="async" referrerpolicy="no-referrer">{% endif %}<span class="cover-border"></span><span class="cover-edition">THE READING ROOM COLLECTION</span><span class="cover-title">{{ book.title }}</span><span class="cover-flourish">✧</span><span class="cover-author">{{ book.author }}</span><span class="cover-bottom">{{ book.category }} <span>·</span> {{ book.publication_date|date:'Y' }}</span></button>
+<div class="book-info"><span class="book-category">{{ book.category }}</span><h3><button data-detail="book-{{ book.pk }}">{{ book.title }}</button></h3><p>{{ book.author }}</p><div class="book-footer"><span class="book-status {% if not book.available_copies %}unavailable{% endif %}"><i></i>{% if book.pk in borrowed_ids %}On your shelf{% elif book.available_copies %}Available{% else %}All copies borrowed{% endif %}</span><button class="book-details-link" data-detail="book-{{ book.pk }}" aria-label="View details for {{ book.title }}"><svg><use href="#i-arrow"/></svg></button></div></div>
+</article>{% empty %}<div class="empty-state"><svg><use href="#i-search"/></svg><h3>{% if query or category or available_only %}No stories on this shelf just yet.{% else %}The shelves are ready for their first stories.{% endif %}</h3><p>{% if query or category or available_only %}Try another title, author, or category.{% else %}Your librarian can add books at the librarian's desk.{% endif %}</p><a href="{% url 'home' %}#collection" class="button button-dark">Back to all books</a></div>{% endfor %}
+</div>
+{% if section == 'saved' %}<div class="empty-state" id="saved-empty" hidden><svg><use href="#i-bookmark"/></svg><h3>Keep a little something for later.</h3><p>Tap the bookmark on any book to save it here. Saved books stay in this browser.</p><a href="/#collection" class="button button-dark">Explore the shelves <svg><use href="#i-arrow"/></svg></a></div>{% endif %}
+{% if has_sample_books %}<p class="sample-note">Sample collection · Demonstration books, ready to replace with your own at the librarian’s desk.</p>{% endif %}<div class="shelf-end"><span></span><svg><use href="#i-book"/></svg><span></span></div>
+</section>
+<section class="reading-corner"><div class="reading-corner-image" role="img" aria-label="Wooden reading table and comfortable library chairs"></div><div class="reading-corner-copy"><span class="eyebrow">THERE'S ALWAYS A SEAT FOR YOU</span><h2>Take the chair by the window.</h2><p>Let the afternoon slow down. Put on a record, open a book,<br class="desktop-br"> and make this little corner your own.</p><button class="text-button" id="corner-music">Set the mood <svg><use href="#i-arrow"/></svg></button></div><div class="reading-quote">“I declare after all<br>there is no enjoyment<br>like reading!”<span>— JANE AUSTEN</span></div></section>
+{% endif %}
+{% for book in books %}<dialog class="book-dialog" id="book-{{ book.pk }}" aria-labelledby="dialog-title-{{ book.pk }}"><button class="dialog-close" aria-label="Close book details">×</button><div class="dialog-book cover-{{ book.pk|stringformat:'s'|last }}">{% if book.cover_url %}<img class="book-cover-image" data-cover-image src="{{ book.cover_url }}" alt="Cover of {{ book.title }}" loading="lazy" decoding="async" referrerpolicy="no-referrer">{% endif %}<span>THE READING ROOM</span><h2>{{ book.title }}</h2><span>✧</span><p>{{ book.author }}</p></div><div class="dialog-copy"><span class="eyebrow">{{ book.category }} · {{ book.publication_date|date:'Y' }}</span><h2 id="dialog-title-{{ book.pk }}">{{ book.title }}</h2><p class="dialog-author">by {{ book.author }}</p>{% if book.description %}<p class="book-description">{{ book.description|truncatechars:650 }}</p>{% endif %}{% if book.cover_source_url %}<a class="cover-source" href="{{ book.cover_source_url }}" target="_blank" rel="noopener noreferrer">Book information &amp; cover: Google Books ↗</a>{% endif %}<dl><div><dt>{% if book.isbn|slice:"0:6" == "SAMPLE" %}Sample ID{% else %}ISBN{% endif %}</dt><dd>{{ book.isbn }}</dd></div><div><dt>On the shelf</dt><dd>{{ book.available_copies }} of {{ book.total_copies }} copies</dd></div></dl><p class="borrowing-note">A new chapter is only a library card away. Borrow a copy and find it on your personal shelf.</p>{% if book.pk in borrowed_ids %}<a class="button button-dark" href="/?section=loans">View on my shelf <svg><use href="#i-arrow"/></svg></a>{% elif book.available_copies and request.user.is_authenticated %}<form action="{% url 'borrow_book' book.pk %}" method="post">{% csrf_token %}<button class="button button-dark" type="submit">Borrow this book<svg><use href="#i-arrow"/></svg></button></form>{% elif book.available_copies %}<a class="button button-dark" href="{% url 'login' %}">Sign in to borrow <svg><use href="#i-arrow"/></svg></a>{% else %}<button class="button button-dark" disabled>All copies are currently borrowed</button>{% endif %}{% if request.user.is_authenticated %}<button class="dialog-save text-button" data-save="{{ book.pk }}" aria-pressed="false"><svg><use href="#i-bookmark"/></svg>Save for later</button>{% endif %}</div></dialog>{% endfor %}
+{% endblock %}
+{% block overlay %}{% include 'accounts/partials/entrance.html' %}{% endblock %}

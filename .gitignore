@@ -2,3 +2,8 @@
 __pycache__/
 *.pyc
 db.sqlite3
+media/
+book_api.local.toml
+.book-api-*.tmp
+.env
+.env.*

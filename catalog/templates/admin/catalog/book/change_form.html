@@ -1,0 +1,12 @@
+{% extends 'admin/change_form.html' %}
+{% block object-tools-items %}
+{% if original and has_change_permission %}<li><a href="{% url 'admin:catalog_book_choose_cover' original.pk %}">Choose cover from Google Books</a></li>{% endif %}
+{{ block.super }}
+{% endblock %}
+{% block after_related_objects %}
+{{ block.super }}
+{% if original and has_change_permission %}
+<p>Find this book's cover by its linked Google volume or exact ISBN. Unsaved edits will not be applied.</p>
+<button type="submit" formnovalidate formaction="{% url 'admin:catalog_book_refresh_cover' original.pk %}" formmethod="post">Refresh cover from Google Books</button>
+{% endif %}
+{% endblock %}
