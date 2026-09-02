@@ -197,6 +197,110 @@
       });
     });
   }
+  // Client-side signup validation
+  const registerForm = document.querySelector('input[name="email"]')?.closest('form');
+
+  console.log("REGISTER FORM:", registerForm);
+  if (registerForm) {
+    registerForm.noValidate = true;
+
+    registerForm.addEventListener('submit', event => {
+      const username = registerForm.querySelector('input[name="username"]');
+      const usernameError = document.getElementById('id_username-client-error');
+
+      const email = registerForm.querySelector('input[name="email"]');
+      const emailError = document.getElementById('id_email-client-error');
+
+      const password = registerForm.querySelector('input[name="password1"]');
+      const passwordError = document.getElementById('id_password1-client-error');
+
+      // Username validation
+      if (!username.value.trim()) {
+        event.preventDefault();
+
+        usernameError.textContent = 'Please enter your username.';
+        usernameError.hidden = false;
+
+        username.focus();
+        return;
+      }
+
+      // Email required validation
+      if (!email.value.trim()) {
+        event.preventDefault();
+
+        emailError.textContent = 'Please enter your email address.';
+        emailError.hidden = false;
+
+        email.focus();
+        return;
+      }
+
+      // Email format validation
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailPattern.test(email.value.trim())) {
+        event.preventDefault();
+
+        emailError.textContent = 'Please enter a valid email address.';
+        emailError.hidden = false;
+
+        email.focus();
+        return;
+      }
+
+      // Password required validation
+      if (!password.value.trim()) {
+        event.preventDefault();
+
+        passwordError.textContent = 'Please enter your password.';
+        passwordError.hidden = false;
+
+        password.focus();
+        return;
+      }
+
+      const passwordConfirmation = registerForm.querySelector(
+        'input[name="password2"]'
+      );
+      const passwordConfirmationError = document.getElementById(
+        'id_password2-client-error'
+      );
+
+      // Password confirmation validation
+      if (!passwordConfirmation.value.trim()) {
+        event.preventDefault();
+
+        passwordConfirmationError.textContent =
+          'Please confirm your password.';
+        passwordConfirmationError.hidden = false;
+
+        passwordConfirmation.focus();
+        return;
+      }
+
+      // Password matching validation
+      if (password.value !== passwordConfirmation.value) {
+        event.preventDefault();
+
+        passwordConfirmationError.textContent =
+          'Passwords do not match.';
+        passwordConfirmationError.hidden = false;
+
+        passwordConfirmation.focus();
+        return;
+      }
+
+
+
+
+
+
+
+
+    });
+  }
+
   // Audio is never started by the entrance or without a deliberate play action.
   const audio = $('#library-audio');
   const play = $('#music-play');
