@@ -1,3 +1,4 @@
+
 (() => {
   'use strict';
   const $ = (selector, parent = document) => parent.querySelector(selector);
@@ -173,7 +174,29 @@
   }));
   changeLayout(storage.get('reading-room-layout', 'grid'));
   $$('.dismiss-message').forEach(button => button.addEventListener('click', () => button.parentElement.remove()));
+  // Client-side book search
+  const searchInput = $("#catalog-form input[name='q']");
 
+  console.log("SEARCH INPUT:", searchInput);
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      console.log("SEARCH INPUT CHANGED:", searchInput.value);
+
+      const query = searchInput.value.trim().toLowerCase();
+
+      $$('.book-card').forEach(card => {
+        const title = card.querySelector('h3')?.textContent.toLowerCase() || '';
+        const author = card.querySelector('.book-info p')?.textContent.toLowerCase() || '';
+
+        const matches =
+          title.includes(query) ||
+          author.includes(query);
+
+        card.hidden = !matches;
+      });
+    });
+  }
   // Audio is never started by the entrance or without a deliberate play action.
   const audio = $('#library-audio');
   const play = $('#music-play');
