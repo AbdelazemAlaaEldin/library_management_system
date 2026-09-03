@@ -1,4 +1,3 @@
-
 (() => {
   'use strict';
   const $ = (selector, parent = document) => parent.querySelector(selector);
@@ -148,16 +147,30 @@
   }));
   refreshSaved();
 
+  // Closing plays a short "shutting the cover" animation before the native dialog actually closes.
+  function closeBookDialog(dialog) {
+    if (dialog.classList.contains('is-closing')) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { dialog.close(); return; }
+    dialog.classList.add('is-closing');
+    const done = () => { dialog.classList.remove('is-closing'); dialog.close(); };
+    dialog.addEventListener('animationend', done, { once: true });
+    setTimeout(done, 400); // safety net if animationend doesn't fire
+  }
   $$('[data-detail]').forEach(button => button.addEventListener('click', () => {
     const dialog = document.getElementById(button.dataset.detail);
     if (dialog) dialog.showModal();
   }));
   $$('.book-dialog').forEach(dialog => {
-    $('.dialog-close', dialog).addEventListener('click', () => dialog.close());
+    $('.dialog-close', dialog).addEventListener('click', () => closeBookDialog(dialog));
     dialog.addEventListener('click', event => {
       if (event.target !== dialog) return;
       const rect = dialog.getBoundingClientRect();
-      if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
+      if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeBookDialog(dialog);
+    });
+    dialog.addEventListener('cancel', event => {
+      // Esc key: intercept the native instant-close so the animation still plays.
+      event.preventDefault();
+      closeBookDialog(dialog);
     });
   });
   function changeLayout(layout) {
@@ -356,4 +369,30 @@
     await toggleMusic();
     if (audio && !audio.paused) toast('The record is on. Make yourself at home.');
   });
+
+  // Visitors cycle through the librarian's track plus built-in ambient sounds
+  // with two arrows. Only the currently playing track's name is ever shown.
+  const switcher = $('#track-switcher');
+  const tracks = Array.isArray(window.__libraryTracks) ? window.__libraryTracks : [];
+  if (audio && switcher && tracks.length > 1) {
+    const titleEl = $('#music-title');
+    const artistEl = $('#music-artist');
+    let index = 0;
+    const remembered = Number(storage.get('reading-room-track-index', 0));
+    if (Number.isInteger(remembered) && remembered >= 0 && remembered < tracks.length) index = remembered;
+    function applyTrack(nextIndex) {
+      const wasPlaying = !audio.paused;
+      index = ((nextIndex % tracks.length) + tracks.length) % tracks.length;
+      const track = tracks[index];
+      titleEl.textContent = track.title;
+      artistEl.textContent = track.artist;
+      audio.src = track.src;
+      audio.load();
+      storage.set('reading-room-track-index', index);
+      if (wasPlaying) audio.play().catch(() => { });
+    }
+    $('#track-prev').addEventListener('click', () => applyTrack(index - 1));
+    $('#track-next').addEventListener('click', () => applyTrack(index + 1));
+    if (index !== 0) applyTrack(index);
+  }
 })();
