@@ -9,6 +9,9 @@ from django.views.decorators.http import require_POST
 from catalog.models import Book
 from loans.models import Loan
 from .forms import RegisterForm
+from django.contrib.auth.decorators import login_required
+from .forms import RegisterForm, AvatarUploadForm
+from .models import Profile
 
 
 def register(request):
@@ -196,3 +199,27 @@ def continue_as_guest(request):
 def user_logout(request):
     logout(request)
     return redirect('home')
+
+
+@login_required
+def account_view(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = AvatarUploadForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your photo has been updated.')
+            return redirect('account')
+    else:
+        form = AvatarUploadForm(instance=profile)
+
+    loans_count = Loan.objects.filter(
+        member=request.user, status='borrowed'
+    ).count()
+
+    return render(
+        request,
+        'accounts/account.html',
+        {'form': form, 'profile': profile, 'loans_count': loans_count}
+    )

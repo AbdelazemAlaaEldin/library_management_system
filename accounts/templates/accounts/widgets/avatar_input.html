@@ -1,0 +1,7 @@
+{% if widget.is_initial %}
+<label class="avatar-clear-toggle" title="Remove photo">
+  <input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}">
+  <span aria-hidden="true">✕</span>
+</label>
+{% endif %}
+<input type="{{ widget.type }}" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>

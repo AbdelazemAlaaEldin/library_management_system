@@ -1,0 +1,55 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Your account — The Reading Room{% endblock %}
+{% block content %}
+<div class="auth-layout">
+  <div class="auth-scene">
+    <span class="eyebrow">YOUR OWN CORNER OF THE LIBRARY</span>
+    <h1>Your library card.</h1>
+    <p>Update your photo and see the details<br>you signed up with.</p>
+  </div>
+
+  <section class="auth-card">
+    <form method="post" enctype="multipart/form-data" id="avatar-form">
+  {% csrf_token %}
+  <div class="avatar-wrap">
+    <button type="button" class="profile-avatar-button" id="avatar-trigger" aria-label="Change your photo">
+      {% if profile.avatar %}
+        <img src="{{ profile.avatar.url }}" alt="Your profile photo">
+      {% else %}
+        <span class="avatar avatar-large">{{ request.user.username|first|upper }}</span>
+      {% endif %}
+    </button>
+    {{ form.avatar }}
+  </div>
+  <span class="avatar-edit-hint" id="avatar-hint">Change photo</span>
+</form>
+
+    <span class="eyebrow">THE READING ROOM</span>
+    <h2>{{ request.user.username }}</h2>
+
+    <dl class="account-details">
+      <div><dt>Username</dt><dd>{{ request.user.username }}</dd></div>
+      <div><dt>Email</dt><dd>{{ request.user.email|default:"—" }}</dd></div>
+      <div><dt>Member since</dt><dd>{{ request.user.date_joined|date:'M j, Y' }}</dd></div>
+      <div><dt>Currently borrowed</dt><dd>{{ loans_count }} book{{ loans_count|pluralize }}</dd></div>
+    </dl>
+
+    <a class="guest-link" href="{% url 'home' %}">← Back to the library</a>
+  </section>
+</div>
+
+<script>
+  document.getElementById('avatar-trigger').addEventListener('click', function () {
+    document.getElementById('id_avatar').click();
+  });
+  document.getElementById('id_avatar').addEventListener('change', function () {
+    document.getElementById('avatar-form').submit();
+  });
+  var clearBox = document.querySelector('.avatar-clear-toggle input[type=checkbox]');
+  if (clearBox) {
+    clearBox.addEventListener('change', function () {
+      document.getElementById('avatar-form').submit();
+    });
+  }
+</script>
+{% endblock %}

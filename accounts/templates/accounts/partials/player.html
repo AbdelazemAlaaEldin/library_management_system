@@ -6,19 +6,31 @@
 {% if ambience.enabled %}<audio id="library-audio" src="{{ ambience.source }}" preload="none" loop></audio><div class="player-controls"><button class="volume-toggle" aria-label="Mute music"><svg><use href="#i-volume"/></svg></button><button id="music-play" class="play-button" aria-label="Play library music"><span class="play-glyph">▶</span></button><span id="music-time">0:00</span></div><label class="volume-label"><span class="sr-only">Music volume</span><input id="music-volume" type="range" min="0" max="1" step="0.05" value="0.3" aria-label="Music volume"></label><p class="music-status" id="music-status">A little music for your next chapter.</p>
 <div class="track-switcher" id="track-switcher" aria-label="Change the ambient sound">
   <button type="button" class="track-nav" id="track-prev" aria-label="Previous sound"><svg><use href="#i-chevron"/></svg></button>
-  <span class="track-switcher-label">Change the mood</span>
+  <span class="track-switcher-label" id="track-switcher-label">Change the mood</span>
   <button type="button" class="track-nav track-next" id="track-next" aria-label="Next sound"><svg><use href="#i-chevron"/></svg></button>
 </div>
 <script>
 /* The full ambient sound list. Add more entries here any time — the arrows
-   just cycle through whatever is in this array, nothing else to touch. */
+   just cycle through whatever matches the current category, or through
+   the general list when no category is selected. category: null = general. */
 window.__libraryTracks = [
-  { title: "{{ ambience.title|escapejs }}", artist: "{{ ambience.artist|escapejs }} · Library sessions", src: "{{ ambience.source|escapejs }}" },
-  { title: "Rain on the Window", artist: "The Reading Room · Ambient", src: "{% static 'library/audio/rain-window.wav' %}" },
-  { title: "A Quiet Café Corner", artist: "The Reading Room · Ambient", src: "{% static 'library/audio/cafe-corner.wav' %}" },
-  { title: "By the Fireplace", artist: "The Reading Room · Ambient", src: "{% static 'library/audio/fireplace-crackle.wav' %}" },
-  { title: "Night Garden", artist: "The Reading Room · Ambient", src: "{% static 'library/audio/night-garden.wav' %}" },
-  { title: "A Waltz for the Shelves", artist: "The Reading Room · Ambient", src: "{% static 'library/audio/piano-waltz.wav' %}" }
+  { title: "{{ ambience.title|escapejs }}", artist: "{{ ambience.artist|escapejs }} · Library sessions", src: "{{ ambience.source|escapejs }}", category: null },
+  { title: "Rain on the Window", artist: "The Reading Room · Ambient", src: "{% static 'library/audio/rain-window.wav' %}", category: null },
+  { title: "A Quiet Café Corner", artist: "The Reading Room · Ambient", src: "{% static 'library/audio/cafe-corner.wav' %}", category: null },
+  { title: "By the Fireplace", artist: "The Reading Room · Ambient", src: "{% static 'library/audio/fireplace-crackle.wav' %}", category: null },
+  { title: "Night Garden", artist: "The Reading Room · Ambient", src: "{% static 'library/audio/night-garden.wav' %}", category: null },
+  { title: "A Waltz for the Shelves", artist: "The Reading Room · Ambient", src: "{% static 'library/audio/piano-waltz.wav' %}", category: null },
+
+  { title: "A Signal from the Void", artist: "The Reading Room · Movies", src: "{% static 'library/audio/science-fiction.mp3' %}", category: "أفلام" },
+  { title: "Trailer Tension", artist: "The Reading Room · Movies", src: "{% static 'library/audio/horror-trailer.mp3' %}", category: "أفلام" },
+  { title: "Something in the Dark", artist: "The Reading Room · Movies", src: "{% static 'library/audio/agressive-monster-growl.mp3' %}", category: "أفلام" },
+  { title: "Storm Outside the Theater", artist: "The Reading Room · Movies", src: "{% static 'library/audio/natural-thunder.mp3' %}", category: "أفلام" },
+  { title: "An Unsettling Laugh", artist: "The Reading Room · Movies", src: "{% static 'library/audio/horror-laugh08.wav' %}", category: "أفلام" },
+  { title: "Jump Scare Sting", artist: "The Reading Room · Movies", src: "{% static 'library/audio/horror-hit-3.mp3' %}", category: "أفلام" },
+  { title: "Strings of Suspense", artist: "The Reading Room · Movies", src: "{% static 'library/audio/horror-violin-tremolo-cluster-b.wav' %}", category: "أفلام" },
+  { title: "A Distant Hum", artist: "The Reading Room · Movies", src: "{% static 'library/audio/horror-humming.mp3' %}", category: "أفلام" },
+  { title: "Voices in the Static", artist: "The Reading Room · Movies", src: "{% static 'library/audio/horror-vocal-pack1.wav' %}", category: "أفلام" },
+  { title: "Hammers in the Dark", artist: "The Reading Room · Movies", src: "{% static 'library/audio/hammers.wav' %}", category: "أفلام" }
 ];
 </script>
 {% else %}<p class="music-status">The librarian has chosen a quiet room.</p>{% endif %}

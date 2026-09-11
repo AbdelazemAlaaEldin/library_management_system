@@ -44,34 +44,38 @@
 
             {% for field in form %}
 
-            <div class="form-field">
+            {% if field.name == 'access_code' %}
+            <div class="form-field" id="access-code-field">
+                {% else %}
+                <div class="form-field">
+                    {% endif %}
 
-                <label for="{{ field.id_for_label }}">
-                    {{ field.label }}
-                </label>
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
 
-                {{ field }}
+                    {{ field }}
 
-                <div class="client-error" id="{{ field.id_for_label }}-client-error" role="alert" hidden></div>
+                    <div class="client-error" id="{{ field.id_for_label }}-client-error" role="alert" hidden></div>
 
-                {% if field.help_text %}
-                <div class="field-help">
-                    {{ field.help_text|safe }}
+                    {% if field.help_text %}
+                    <div class="field-help">
+                        {{ field.help_text|safe }}
+                    </div>
+                    {% endif %}
+
+                    {{ field.errors }}
+
                 </div>
-                {% endif %}
 
-                {{ field.errors }}
+                {% endfor %}
 
-            </div>
-
-            {% endfor %}
-
-            <button type="submit" class="button button-dark">
-                Register
-                <svg>
-                    <use href="#i-arrow" />
-                </svg>
-            </button>
+                <button type="submit" class="button button-dark">
+                    Register
+                    <svg>
+                        <use href="#i-arrow" />
+                    </svg>
+                </button>
 
         </form>
 
@@ -87,5 +91,35 @@
     </section>
 
 </div>
+<style>
+    .role-choice {
+        display: flex;
+        gap: 16px;
+        margin-top: 6px
+    }
 
+    .role-choice label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: normal;
+        cursor: pointer
+    }
+
+    #access-code-field {
+        display: none
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var radios = document.querySelectorAll('input[name="role"]');
+        var codeField = document.getElementById('access-code-field');
+        function toggle() {
+            var selected = document.querySelector('input[name="role"]:checked');
+            codeField.style.display = (selected && selected.value === 'librarian') ? 'block' : 'none';
+        }
+        radios.forEach(function (r) { r.addEventListener('change', toggle); });
+        toggle();
+    });
+</script>
 {% endblock %}

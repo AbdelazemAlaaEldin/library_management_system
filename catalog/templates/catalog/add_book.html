@@ -1,0 +1,116 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Add a book — The Reading Room{% endblock %}
+{% block content %}
+<div class="page-intro">
+  <div>
+    <div class="eyebrow">FOR THE LIBRARIAN'S DESK</div>
+    <h1>Add a new book<span class="heading-dot">.</span></h1>
+  </div>
+</div>
+
+<div class="librarian-layout">
+  <section class="auth-card librarian-form-card">
+    <p class="librarian-hint">Fill in the book's details, or use <a href="{% url 'admin:catalog_book_import' %}">Search Google Books</a> to import one automatically with its cover.</p>
+
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+
+      {% for field in form %}
+      <div class="form-field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {{ field.errors }}
+      </div>
+      {% if field.name == 'cover_url' %}
+      <div class="cover-preview-wrap">
+        <img id="cover-preview" class="cover-preview" alt="Cover preview" hidden>
+        <span id="cover-preview-empty" class="cover-preview-empty">Cover preview will appear here</span>
+      </div>
+      {% endif %}
+      {% endfor %}
+
+      <button type="submit" class="button button-dark">Add book <svg><use href="#i-arrow"/></svg></button>
+    </form>
+
+    <a class="guest-link" href="{% url 'home' %}">← Back to the library</a>
+  </section>
+
+    <section class="librarian-list-card">
+    <div class="section-heading">
+      <div><h2>Your collection</h2></div>
+      <span>{{ books|length }} book{{ books|length|pluralize }}</span>
+    </div>
+    <input type="search" id="book-search" class="librarian-search" placeholder="Search by title, author, or category…">
+    <div class="librarian-book-list" id="librarian-book-list">
+      {% for book in books %}
+      <a class="librarian-book-row" href="{% url 'edit_book' book.pk %}" data-search="{{ book.title|lower }} {{ book.author|lower }} {{ book.category|lower }}">
+        <span class="librarian-book-cover">
+          {% if book.cover_url %}<img src="{{ book.cover_url }}" alt="" loading="lazy">{% else %}<svg><use href="#i-book"/></svg>{% endif %}
+        </span>
+        <span class="librarian-book-info">
+          <strong>{{ book.title }}</strong>
+          <span>{{ book.author }} · {{ book.category }}</span>
+        </span>
+        <span class="librarian-book-copies">{{ book.available_copies }}/{{ book.total_copies }}</span>
+      </a>
+      {% empty %}
+      <p class="librarian-empty">No books yet. Add your first one above.</p>
+      {% endfor %}
+    </div>
+    <p class="librarian-empty" id="librarian-no-results" hidden>No books match your search.</p>
+  </section>
+</div>
+
+<script>
+  (function () {
+    var input = document.getElementById('id_cover_url');
+    var img = document.getElementById('cover-preview');
+    var empty = document.getElementById('cover-preview-empty');
+    if (!input) return;
+
+    function update() {
+      var url = input.value.trim();
+      if (url) {
+        img.src = url;
+        img.hidden = false;
+        empty.hidden = true;
+      } else {
+        img.hidden = true;
+        empty.hidden = false;
+      }
+    }
+
+    img.addEventListener('error', function () {
+      img.hidden = true;
+      empty.hidden = false;
+      empty.textContent = 'Could not load this image';
+    });
+    img.addEventListener('load', function () {
+      empty.hidden = true;
+    });
+
+    input.addEventListener('input', update);
+    update();
+  })();
+</script>
+<script>
+  (function () {
+    var search = document.getElementById('book-search');
+    var rows = document.querySelectorAll('#librarian-book-list .librarian-book-row');
+    var noResults = document.getElementById('librarian-no-results');
+    if (!search) return;
+
+    search.addEventListener('input', function () {
+      var query = search.value.trim().toLowerCase();
+      var visibleCount = 0;
+      rows.forEach(function (row) {
+        var match = row.dataset.search.indexOf(query) !== -1;
+        row.hidden = !match;
+        if (match) visibleCount++;
+      });
+      noResults.hidden = visibleCount !== 0;
+    });
+  })();
+</script>
+{% endblock %}

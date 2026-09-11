@@ -30,7 +30,7 @@
   <div class="sidebar-bottom">
     {% include 'accounts/partials/player.html' %}
     <a class="librarian-link" href="{% url 'admin:index' %}"><svg><use href="#i-key"/></svg>Librarian's desk<svg><use href="#i-arrow"/></svg></a>
-    {% if request.user.is_staff %}{% if perms.catalog.add_book or perms.catalog.change_book %}<a class="librarian-link" href="{% url 'admin:catalog_book_import' %}"><svg><use href="#i-books"/></svg>Find books &amp; covers<svg><use href="#i-arrow"/></svg></a>{% endif %}{% endif %}
+    {% if request.user.is_staff %}{% if perms.catalog.add_book or perms.catalog.change_book %}<a class="librarian-link" href="{% url 'admin:catalog_book_import' %}"><svg><use href="#i-books"/></svg>Find books &amp; covers<svg><use href="#i-arrow"/></svg></a>{% endif %}<a class="librarian-link" href="{% url 'add_book' %}"><svg><use href="#i-books"/></svg>Add a book<svg><use href="#i-arrow"/></svg></a>{% endif %}
     <div class="sidebar-footer">A quieter place on the internet.</div>
   </div>
 </aside>
@@ -39,7 +39,7 @@
 <header class="topbar">
   <button class="icon-button menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><svg><use href="#i-menu"/></svg></button>
   <p class="topbar-note"><span class="little-spark">✧</span> A little curiosity. A whole new world.</p>
-  <div class="topbar-actions"><span class="open-label"><i></i> The library is open</span><span class="topbar-divider"></span>{% if request.user.is_authenticated %}<span class="avatar">{{ request.user.username|first|upper }}</span><span class="account-name">{{ request.user.username }}</span><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="text-button" type="submit">Sign out</button></form>{% else %}<a class="sign-in" href="{% url 'login' %}"><span class="avatar"><svg><use href="#i-user"/></svg></span>Sign in <svg><use href="#i-arrow"/></svg></a>{% endif %}</div>
+  <div class="topbar-actions"><span class="open-label"><i></i> The library is open</span><span class="topbar-divider"></span>{% if request.user.is_authenticated %}<a class="account-link" href="{% url 'account' %}">{% if request.user.profile.avatar %}<span class="avatar avatar-photo"><img src="{{ request.user.profile.avatar.url }}" alt=""></span>{% else %}<span class="avatar">{{ request.user.username|first|upper }}</span>{% endif %}<span class="account-name">{{ request.user.username }}</span></a><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="text-button" type="submit">Sign out</button></form>{% else %}<a class="sign-in" href="{% url 'login' %}"><span class="avatar"><svg><use href="#i-user"/></svg></span>Sign in <svg><use href="#i-arrow"/></svg></a>{% endif %}</div>
 </header>
 <main id="main" tabindex="-1">{% if messages %}<div class="messages" role="status">{% for message in messages %}<div class="message {{ message.tags }}"><svg><use href="#i-check"/></svg>{{ message }}<button aria-label="Dismiss message" class="dismiss-message">×</button></div>{% endfor %}</div>{% endif %}{% block content %}{% endblock %}</main>
 <footer class="page-footer"><a href="{% url 'home' %}"><svg><use href="#i-book"/></svg>The Reading Room</a><span>Good books. Warm corners. A little time for yourself.</span><button class="text-button" id="reopen-doors">Step outside ↗</button></footer>

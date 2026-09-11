@@ -1,0 +1,70 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Edit {{ book.title }} — The Reading Room{% endblock %}
+{% block content %}
+<div class="page-intro">
+  <div>
+    <div class="eyebrow">FOR THE LIBRARIAN'S DESK</div>
+    <h1>Edit this book<span class="heading-dot">.</span></h1>
+  </div>
+</div>
+
+<section class="auth-card librarian-form-card">
+  <form method="post">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+
+    {% for field in form %}
+    <div class="form-field">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {{ field.errors }}
+    </div>
+    {% if field.name == 'cover_url' %}
+    <div class="cover-preview-wrap">
+      <img id="cover-preview" class="cover-preview" alt="Cover preview" src="{{ book.cover_url }}" {% if not book.cover_url %}hidden{% endif %}>
+      <span id="cover-preview-empty" class="cover-preview-empty" {% if book.cover_url %}hidden{% endif %}>Cover preview will appear here</span>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <div class="librarian-edit-actions">
+      <button type="submit" class="button button-dark">Save changes <svg><use href="#i-arrow"/></svg></button>
+      <button type="submit" name="delete" value="1" class="button button-danger" onclick="return confirm('Delete “{{ book.title }}” permanently? This cannot be undone.');">Delete book</button>
+    </div>
+  </form>
+
+  <a class="guest-link" href="{% url 'add_book' %}">← Back to the collection</a>
+</section>
+
+<script>
+  (function () {
+    var input = document.getElementById('id_cover_url');
+    var img = document.getElementById('cover-preview');
+    var empty = document.getElementById('cover-preview-empty');
+    if (!input) return;
+
+    function update() {
+      var url = input.value.trim();
+      if (url) {
+        img.src = url;
+        img.hidden = false;
+        empty.hidden = true;
+      } else {
+        img.hidden = true;
+        empty.hidden = false;
+      }
+    }
+
+    img.addEventListener('error', function () {
+      img.hidden = true;
+      empty.hidden = false;
+      empty.textContent = 'Could not load this image';
+    });
+    img.addEventListener('load', function () {
+      empty.hidden = true;
+    });
+
+    input.addEventListener('input', update);
+  })();
+</script>
+{% endblock %}

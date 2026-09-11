@@ -370,15 +370,25 @@
     if (audio && !audio.paused) toast('The record is on. Make yourself at home.');
   });
 
-  // Visitors cycle through the librarian's track plus built-in ambient sounds
-  // with two arrows. Only the currently playing track's name is ever shown.
+    // Visitors cycle through the librarian's track plus built-in ambient sounds
+  // with two arrows. When a category is selected, only that category's
+  // tracks (plus the librarian's own pick) are offered.
   const switcher = $('#track-switcher');
-  const tracks = Array.isArray(window.__libraryTracks) ? window.__libraryTracks : [];
+  const allTracks = Array.isArray(window.__libraryTracks) ? window.__libraryTracks : [];
+  const currentCategory = (window.__currentCategory || '').trim();
+  const tracks = currentCategory
+    ? allTracks.filter(track => track.category === null || track.category === currentCategory)
+    : allTracks;
+  const switcherLabel = $('#track-switcher-label');
+  if (switcherLabel && currentCategory && tracks.length > 1) {
+    switcherLabel.textContent = `Change the mood · ${currentCategory}`;
+  }
   if (audio && switcher && tracks.length > 1) {
     const titleEl = $('#music-title');
     const artistEl = $('#music-artist');
     let index = 0;
-    const remembered = Number(storage.get('reading-room-track-index', 0));
+    const storageKey = currentCategory ? `reading-room-track-index-${currentCategory}` : 'reading-room-track-index';
+    const remembered = Number(storage.get(storageKey, 0));
     if (Number.isInteger(remembered) && remembered >= 0 && remembered < tracks.length) index = remembered;
     function applyTrack(nextIndex) {
       const wasPlaying = !audio.paused;
@@ -388,11 +398,13 @@
       artistEl.textContent = track.artist;
       audio.src = track.src;
       audio.load();
-      storage.set('reading-room-track-index', index);
+      storage.set(storageKey, index);
       if (wasPlaying) audio.play().catch(() => { });
     }
     $('#track-prev').addEventListener('click', () => applyTrack(index - 1));
     $('#track-next').addEventListener('click', () => applyTrack(index + 1));
     if (index !== 0) applyTrack(index);
+  } else if (switcher && tracks.length <= 1) {
+    switcher.hidden = true;
   }
 })();
